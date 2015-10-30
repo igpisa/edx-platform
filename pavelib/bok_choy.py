@@ -59,7 +59,7 @@ def test_bokchoy(options):
 
     opts = {
         'test_spec': getattr(options, 'test_spec', None),
-        'num_processes': getattr(options, 'num_processes', 1),
+        'num_processes': int(getattr(options, 'num_processes', 1)),
         'fasttest': getattr(options, 'fasttest', False),
         'serversonly': getattr(options, 'serversonly', False),
         'testsonly': getattr(options, 'testsonly', False),
