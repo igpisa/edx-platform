@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Tests for certificates views. """
 
 import json
@@ -408,6 +409,26 @@ class CertificatesViewsTests(ModuleStoreTestCase, EventTrackingTestCase):
         self.assertNotIn(self.course.display_name, response.content)
         self.assertIn('course_title_0', response.content)
         self.assertIn('Signatory_Title 0', response.content)
+
+    @override_settings(FEATURES=FEATURES_WITH_CERTS_ENABLED)
+    def test_render_html_view_with_preview_mode_unicode_urls(self):
+        """
+        test certificate web view should render properly in
+        preview mode even share url has unicode characters.
+        """
+        self._add_course_certificates(count=1, signatory_count=2)
+        CourseStaffRole(self.course.id).add_users(self.user)
+
+        test_url = get_certificate_url(
+            user_id=self.user.id,
+            course_id=unicode(self.course.id)
+        )
+        with patch('django.http.HttpRequest.build_absolute_uri') as mock_abs_uri:
+            mock_abs_uri.return_value = '='.join(['http://localhost/?param', u'é'])
+            response = self.client.get(test_url + '?preview=verified')
+            self.assertNotIn(self.course.display_name, response.content)
+            self.assertIn('course_title_0', response.content)
+            self.assertIn('Signatory_Title 0', response.content)
 
     @override_settings(FEATURES=FEATURES_WITH_CERTS_ENABLED)
     def test_render_html_view_invalid_certificate_configuration(self):
